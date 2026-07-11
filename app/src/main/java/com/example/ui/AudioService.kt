@@ -12,20 +12,30 @@ import java.util.*
 class AudioService(private val context: Context) {
 
     private var tts: TextToSpeech? = null
+    private var isTtsReady = false
     private var speechRecognizer: SpeechRecognizer? = null
 
     init {
         tts = TextToSpeech(context) { status ->
-            if (status != TextToSpeech.ERROR) {
-                tts?.language = Locale.US
+            if (status == TextToSpeech.SUCCESS) {
+                val result = tts?.setLanguage(Locale.US)
+                if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
+                    isTtsReady = true
+                }
             }
         }
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
     }
 
     fun speak(text: String, locale: Locale) {
-        tts?.language = locale
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, null)
+        if (!isTtsReady) {
+            // If not ready, try to initialize language and speak anyway
+            tts?.setLanguage(locale)
+            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TTS_ID")
+            return
+        }
+        tts?.setLanguage(locale)
+        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TTS_ID")
     }
 
     fun listen(locale: Locale, onResult: (String) -> Unit, onError: (String) -> Unit) {
