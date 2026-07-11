@@ -1,0 +1,6 @@
+{
+  "name": "Murtaza Sphere",
+  "description": "An interactive, multi-subject educational quest for kids aged 10-15 covering Math, English, Coding, and Robotics with an AI Tutor.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
