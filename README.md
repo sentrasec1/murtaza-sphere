@@ -1,5 +1,9 @@
 # Murtaza Sphere
 
+<p align="center">
+  <img src="assets/logo.jpg" width="300" alt="Murtaza Sphere Logo">
+</p>
+
 An educational mobile application built with Kotlin for Android devices.
 
 ## Overview
