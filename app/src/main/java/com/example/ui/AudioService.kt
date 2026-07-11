@@ -7,6 +7,8 @@ import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
 import android.speech.tts.TextToSpeech
+import android.speech.tts.UtteranceProgressListener
+import android.widget.Toast
 import java.util.*
 
 class AudioService(private val context: Context) {
@@ -18,10 +20,16 @@ class AudioService(private val context: Context) {
     init {
         tts = TextToSpeech(context) { status ->
             if (status == TextToSpeech.SUCCESS) {
-                val result = tts?.setLanguage(Locale.US)
-                if (result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED) {
-                    isTtsReady = true
-                }
+                isTtsReady = true
+                tts?.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
+                    override fun onStart(utteranceId: String?) {}
+                    override fun onDone(utteranceId: String?) {}
+                    override fun onError(utteranceId: String?) {
+                        // Log or handle error if needed
+                    }
+                })
+            } else {
+                Toast.makeText(context, "TTS Initialization failed", Toast.LENGTH_SHORT).show()
             }
         }
         speechRecognizer = SpeechRecognizer.createSpeechRecognizer(context)
@@ -29,13 +37,16 @@ class AudioService(private val context: Context) {
 
     fun speak(text: String, locale: Locale) {
         if (!isTtsReady) {
-            // If not ready, try to initialize language and speak anyway
-            tts?.setLanguage(locale)
-            tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TTS_ID")
+            Toast.makeText(context, "Preparing audio engine...", Toast.LENGTH_SHORT).show()
             return
         }
-        tts?.setLanguage(locale)
-        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, null, "TTS_ID")
+        
+        tts?.stop() // Stop any ongoing speech
+        tts?.language = locale
+        val params = Bundle().apply {
+            putString(TextToSpeech.Engine.KEY_PARAM_UTTERANCE_ID, "MurtazaSphere_TTS")
+        }
+        tts?.speak(text, TextToSpeech.QUEUE_FLUSH, params, "MurtazaSphere_TTS")
     }
 
     fun listen(locale: Locale, onResult: (String) -> Unit, onError: (String) -> Unit) {
